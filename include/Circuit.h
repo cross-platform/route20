@@ -31,9 +31,10 @@
 
 #pragma once
 
+#include <Common.h>
+
 #include <any>
 #include <map>
-#include <vector>
 
 namespace Route20
 {
@@ -100,21 +101,24 @@ private:
         }
         tickeds[comp.id] = true;
 
-        comp.InputWires( [&]<auto output, auto input>( const auto& fromComp ) {
-            Tick( fromComp );
+        using CompRt = std::remove_reference<decltype( comp )>::type::runtime;
 
-            auto& compRt =
-                std::any_cast<typename std::remove_reference<decltype( comp )>::type::runtime&>( rts[comp.id] );
-            auto& fromCompRt =
-                std::any_cast<typename std::remove_reference<decltype( fromComp )>::type::runtime&>( rts[fromComp.id] );
+        comp.InputWires( [&]<auto output, auto input>( const auto& fromComp )
+                         {
+                             Tick( fromComp );
 
-            std::get<input>( compRt.inputs ) = std::get<output>( fromCompRt.outputs );
-        } );
+                             using FromCompRt = std::remove_reference<decltype( fromComp )>::type::runtime;
 
-        comp.Tick( std::any_cast<typename std::remove_reference<decltype( comp )>::type::runtime&>( rts[comp.id] ) );
+                             std::get<input>( std::get<CompRt>( rts[comp.id] ).inputs ) =
+                                 std::get<output>( std::get<FromCompRt>( rts[fromComp.id] ).outputs );
+                         } );
+
+        comp.Tick( std::get<CompRt>( rts[comp.id] ) );
     }
 
-    std::map<unsigned int, std::any> rts;
+    using RtTypes = std::variant<typename decltype( components )::runtime...>;
+
+    std::map<unsigned int, without_duplicates<RtTypes>> rts;
     std::map<unsigned int, bool> tickeds;
 };
 

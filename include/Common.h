@@ -31,78 +31,42 @@
 
 #pragma once
 
-#include <iostream>
+#include <variant>
 
-namespace Route20
+template <class Haystack, class Needle>
+struct contains;
+
+template <class Car, class... Cdr, class Needle>
+struct contains<std::variant<Car, Cdr...>, Needle> : contains<std::variant<Cdr...>, Needle>
 {
-
-/// RandBool:
-/// RandBool has 1 output.
-/// This component generates a random boolean value then outputs the result.
-
-class RandBoolRt final
-{
-public:
-    RandBoolRt()
-    {
-        // seed randomizer
-        srand( static_cast<unsigned int>( time( nullptr ) ) );
-    }
-
-    std::tuple<> inputs;
-    std::tuple<bool> outputs;
 };
 
-struct RandBool
+template <class... Cdr, class Needle>
+struct contains<std::variant<Needle, Cdr...>, Needle> : std::true_type
 {
-    using runtime = RandBoolRt;
-
-    void Tick( runtime& rt ) const
-    {
-        std::get<0>( rt.outputs ) = rand() % 2 == 0;
-    }
 };
 
-/// And:
-/// And has 2 inputs and 1 output.
-/// This component performs a logic AND on 2 boolean input values and outputs the result.
-
-class AndRt final
+template <class Needle>
+struct contains<std::variant<>, Needle> : std::false_type
 {
-public:
-    std::tuple<bool, bool> inputs;
-    std::tuple<bool> outputs;
 };
 
-struct And
-{
-    using runtime = AndRt;
+template <class Out, class In>
+struct filter;
 
-    void Tick( runtime& rt ) const
-    {
-        std::get<0>( rt.outputs ) = std::get<0>( rt.inputs ) && std::get<1>( rt.inputs );
-    }
+template <class... Out, class InCar, class... InCdr>
+struct filter<std::variant<Out...>, std::variant<InCar, InCdr...>>
+{
+    using type = typename std::conditional<contains<std::variant<Out...>, InCar>::value,
+                                           filter<std::variant<Out...>, std::variant<InCdr...>>,
+                                           filter<std::variant<Out..., InCar>, std::variant<InCdr...>>>::type::type;
 };
 
-/// PrintBool:
-/// PrintBool has 1 input.
-/// This component receives a boolean value and outputs it to the console.
-
-class PrintRt final
+template <class Out>
+struct filter<Out, std::variant<>>
 {
-public:
-    std::tuple<bool> inputs;
-    std::tuple<> outputs;
+    using type = Out;
 };
 
-struct PrintBool
-{
-    using runtime = PrintRt;
-
-    void Tick( runtime& rt ) const
-    {
-        std::cout << ( std::get<0>( rt.inputs ) ? "true" : "false" ) << std::endl;
-    }
-};
-
-}  // namespace Route20
+template <class T>
+using without_duplicates = typename filter<std::variant<>, T>::type;
