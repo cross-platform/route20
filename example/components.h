@@ -50,17 +50,18 @@ public:
         // seed randomizer
         srand( static_cast<unsigned int>( time( nullptr ) ) );
     }
+
+    std::tuple<> inputs;
+    std::tuple<bool> outputs;
 };
 
 struct RandBool
 {
-    const int nInputs = 0;
-    const int nOutputs = 1;
     using runtime = RandBoolRt;
 
-    void Tick( runtime&, const std::vector<std::any>&, std::vector<std::any>& outputs ) const
+    void Tick( runtime& rt ) const
     {
-        outputs[0] = rand() % 2 == 0;
+        std::get<0>( rt.outputs ) = rand() % 2 == 0;
     }
 };
 
@@ -68,15 +69,20 @@ struct RandBool
 /// And has 2 inputs and 1 output.
 /// This component performs a logic AND on 2 boolean input values and outputs the result.
 
+class AndRt final
+{
+public:
+    std::tuple<bool, bool> inputs;
+    std::tuple<bool> outputs;
+};
+
 struct And
 {
-    const int nInputs = 2;
-    const int nOutputs = 1;
-    using runtime = nullptr_t;
+    using runtime = AndRt;
 
-    void Tick( runtime&, const std::vector<std::any>& inputs, std::vector<std::any>& outputs ) const
+    void Tick( runtime& rt ) const
     {
-        outputs[0] = std::any_cast<bool>( inputs[0] ) && std::any_cast<bool>( inputs[1] );
+        std::get<0>( rt.outputs ) = std::get<0>( rt.inputs ) && std::get<1>( rt.inputs );
     }
 };
 
@@ -84,15 +90,20 @@ struct And
 /// PrintBool has 1 input.
 /// This component receives a boolean value and outputs it to the console.
 
+class PrintRt final
+{
+public:
+    std::tuple<bool> inputs;
+    std::tuple<> outputs;
+};
+
 struct PrintBool
 {
-    const int nInputs = 1;
-    const int nOutputs = 0;
-    using runtime = nullptr_t;
+    using runtime = PrintRt;
 
-    void Tick( runtime&, const std::vector<std::any>& inputs, std::vector<std::any>& ) const
+    void Tick( runtime& rt ) const
     {
-        std::cout << ( std::any_cast<bool>( inputs[0] ) ? "true" : "false" ) << std::endl;
+        std::cout << ( std::get<0>( rt.inputs ) ? "true" : "false" ) << std::endl;
     }
 };
 

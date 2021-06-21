@@ -51,14 +51,14 @@ struct Component final : public Impl
     template <auto _fromComp, auto _output, auto _input, auto _nextFromComp, auto _nextOutput, auto... _nextInput>
     void InputWires( auto callback ) const
     {
-        callback( _fromComp, _output, _input );
+        callback.template operator()<_output, _input>( _fromComp );
         InputWires<_nextFromComp, _nextOutput, _nextInput...>( callback );
     }
 
     template <auto _fromComp, auto _output, auto _input>
     void InputWires( auto callback ) const
     {
-        callback( _fromComp, _output, _input );
+        callback.template operator()<_output, _input>( _fromComp );
     }
 
     template <auto _fromComp, auto _output>

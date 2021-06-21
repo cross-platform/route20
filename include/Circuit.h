@@ -75,8 +75,6 @@ private:
 
     void InitMaps( const auto& comp )
     {
-        inputs[comp.id].resize( comp.nInputs );
-        outputs[comp.id].resize( comp.nOutputs );
         rts[comp.id] = typename std::remove_reference<decltype( comp )>::type::runtime();
         tickeds[comp.id] = false;
     }
@@ -102,19 +100,20 @@ private:
         }
         tickeds[comp.id] = true;
 
-        comp.InputWires(
-            [&]( const auto& fromComp, auto output, auto input )
-            {
-                Tick( fromComp );
-                inputs[comp.id][input] = outputs[fromComp.id][output];
-            } );
+        comp.InputWires( [&]<auto output, auto input>( const auto& fromComp ) {
+            Tick( fromComp );
 
-        comp.Tick( std::any_cast<typename std::remove_reference<decltype( comp )>::type::runtime&>( rts[comp.id] ),
-                   inputs[comp.id], outputs[comp.id] );
+            auto& compRt =
+                std::any_cast<typename std::remove_reference<decltype( comp )>::type::runtime&>( rts[comp.id] );
+            auto& fromCompRt =
+                std::any_cast<typename std::remove_reference<decltype( fromComp )>::type::runtime&>( rts[fromComp.id] );
+
+            std::get<input>( compRt.inputs ) = std::get<output>( fromCompRt.outputs );
+        } );
+
+        comp.Tick( std::any_cast<typename std::remove_reference<decltype( comp )>::type::runtime&>( rts[comp.id] ) );
     }
 
-    std::map<unsigned int, std::vector<std::any>> inputs;
-    std::map<unsigned int, std::vector<std::any>> outputs;
     std::map<unsigned int, std::any> rts;
     std::map<unsigned int, bool> tickeds;
 };
