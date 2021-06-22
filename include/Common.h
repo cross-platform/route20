@@ -33,6 +33,9 @@
 
 #include <variant>
 
+namespace Route20
+{
+
 template <class Haystack, class Needle>
 struct contains;
 
@@ -70,3 +73,5 @@ struct filter<Out, std::variant<>>
 
 template <class T>
 using without_duplicates = typename filter<std::variant<>, T>::type;
+
+}  // namespace Route20

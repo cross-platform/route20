@@ -33,7 +33,6 @@
 
 #include <Common.h>
 
-#include <any>
 #include <map>
 
 namespace Route20
@@ -76,7 +75,8 @@ private:
 
     void InitMaps( const auto& comp )
     {
-        rts[comp.id] = typename std::remove_reference<decltype( comp )>::type::runtime();
+        using CompRt = std::remove_reference<decltype( comp )>::type::runtime;
+        rts[comp.id].template emplace<CompRt>();
         tickeds[comp.id] = false;
     }
 
@@ -103,15 +103,14 @@ private:
 
         using CompRt = std::remove_reference<decltype( comp )>::type::runtime;
 
-        comp.InputWires( [&]<auto output, auto input>( const auto& fromComp )
-                         {
-                             Tick( fromComp );
+        comp.InputWires( [&]<auto output, auto input>( const auto& fromComp ) {
+            Tick( fromComp );
 
-                             using FromCompRt = std::remove_reference<decltype( fromComp )>::type::runtime;
+            using FromCompRt = std::remove_reference<decltype( fromComp )>::type::runtime;
 
-                             std::get<input>( std::get<CompRt>( rts[comp.id] ).inputs ) =
-                                 std::get<output>( std::get<FromCompRt>( rts[fromComp.id] ).outputs );
-                         } );
+            std::get<input>( std::get<CompRt>( rts[comp.id] ).inputs ) =
+                std::get<output>( std::get<FromCompRt>( rts[fromComp.id] ).outputs );
+        } );
 
         comp.Tick( std::get<CompRt>( rts[comp.id] ) );
     }

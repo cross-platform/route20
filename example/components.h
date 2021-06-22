@@ -49,6 +49,9 @@ public:
         srand( static_cast<unsigned int>( time( nullptr ) ) );
     }
 
+    RandBoolRt( const RandBoolRt& ) = delete;
+    RandBoolRt& operator=( const RandBoolRt& ) = delete;
+
     std::tuple<> inputs;
     std::tuple<bool> outputs;
 };
@@ -70,6 +73,10 @@ struct RandBool
 class AndRt final
 {
 public:
+    AndRt() = default;
+    AndRt( const AndRt& ) = delete;
+    AndRt& operator=( const AndRt& ) = delete;
+
     std::tuple<bool, bool> inputs;
     std::tuple<bool> outputs;
 };
@@ -91,6 +98,10 @@ struct And
 class PrintRt final
 {
 public:
+    PrintRt() = default;
+    PrintRt( const PrintRt& ) = delete;
+    PrintRt& operator=( const PrintRt& ) = delete;
+
     std::tuple<bool> inputs;
     std::tuple<> outputs;
 };
