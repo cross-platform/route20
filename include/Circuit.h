@@ -63,19 +63,14 @@ private:
     template <auto comp, auto comp2, auto... comps>
     void InitMaps()
     {
-        InitMaps( comp );
+        InitMaps<comp>();
         InitMaps<comp2, comps...>();
     }
 
     template <auto comp>
     void InitMaps()
     {
-        InitMaps( comp );
-    }
-
-    void InitMaps( const auto& comp )
-    {
-        using CompRt = std::remove_reference<decltype( comp )>::type::runtime;
+        using CompRt = decltype( comp )::runtime;
         rts[comp.id].template emplace<CompRt>();
         tickeds[comp.id] = false;
     }
@@ -83,17 +78,12 @@ private:
     template <auto comp, auto comp2, auto... comps>
     void Tick()
     {
-        Tick( comp );
+        Tick<comp>();
         Tick<comp2, comps...>();
     }
 
     template <auto comp>
     void Tick()
-    {
-        Tick( comp );
-    }
-
-    void Tick( const auto& comp )
     {
         if ( tickeds[comp.id] )
         {
@@ -101,12 +91,12 @@ private:
         }
         tickeds[comp.id] = true;
 
-        using CompRt = std::remove_reference<decltype( comp )>::type::runtime;
+        using CompRt = decltype( comp )::runtime;
 
-        comp.InputWires( [&]<auto output, auto input>( const auto& fromComp ) {
-            Tick( fromComp );
+        comp.InputWires( [this]<auto fromComp, auto output, auto input>() {
+            Tick<fromComp>();
 
-            using FromCompRt = std::remove_reference<decltype( fromComp )>::type::runtime;
+            using FromCompRt = decltype( fromComp )::runtime;
 
             std::get<input>( std::get<CompRt>( rts[comp.id] ).inputs ) =
                 std::get<output>( std::get<FromCompRt>( rts[fromComp.id] ).outputs );
@@ -115,9 +105,7 @@ private:
         comp.Tick( std::get<CompRt>( rts[comp.id] ) );
     }
 
-    using RtTypes = std::variant<typename decltype( components )::runtime...>;
-
-    std::map<unsigned int, without_duplicates<RtTypes>> rts;
+    std::map<unsigned int, dedup_variant<std::variant<typename decltype( components )::runtime...>>> rts;
     std::map<unsigned int, bool> tickeds;
 };
 

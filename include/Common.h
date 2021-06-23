@@ -72,6 +72,6 @@ struct filter<Out, std::variant<>>
 };
 
 template <class T>
-using without_duplicates = typename filter<std::variant<>, T>::type;
+using dedup_variant = typename filter<std::variant<>, T>::type;
 
 }  // namespace Route20

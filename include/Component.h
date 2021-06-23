@@ -43,26 +43,26 @@ struct Component final : public Impl
     consteval Component( const Component& ) = default;
     Component& operator=( const Component& ) = delete;
 
-    void InputWires( auto callback ) const
+    void InputWires( const auto& callback ) const
     {
         InputWires<fromComp, output, input...>( callback );
     }
 
     template <auto _fromComp, auto _output, auto _input, auto _nextFromComp, auto _nextOutput, auto... _nextInput>
-    void InputWires( auto callback ) const
+    void InputWires( const auto& callback ) const
     {
-        callback.template operator()<_output, _input>( _fromComp );
+        InputWires<_fromComp, _output, _input>( callback );
         InputWires<_nextFromComp, _nextOutput, _nextInput...>( callback );
     }
 
     template <auto _fromComp, auto _output, auto _input>
-    void InputWires( auto callback ) const
+    void InputWires( const auto& callback ) const
     {
-        callback.template operator()<_output, _input>( _fromComp );
+        callback.template operator()<_fromComp, _output, _input>();
     }
 
-    template <auto _fromComp, auto _output>
-    void InputWires( auto ) const
+    template <auto, auto>
+    void InputWires( const auto& ) const
     {
     }
 };
