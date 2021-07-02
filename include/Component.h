@@ -35,8 +35,9 @@ namespace Route20
 {
 
 template <unsigned int uid, class Impl, auto fromComp = nullptr, auto output = -1, auto... input>
-struct Component final : public Impl
+class Component final : public Impl
 {
+public:
     const unsigned int id = uid;
 
     consteval Component() = default;

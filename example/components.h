@@ -40,24 +40,26 @@ namespace Route20
 /// RandBool has 1 output.
 /// This component generates a random boolean value then outputs the result.
 
-class RandBoolRt final
+class RandBool
 {
-public:
-    RandBoolRt()
+private:
+    class RandBoolRt final
     {
-        // seed randomizer
-        srand( static_cast<unsigned int>( time( nullptr ) ) );
-    }
+    public:
+        RandBoolRt()
+        {
+            // seed randomizer
+            srand( static_cast<unsigned int>( time( nullptr ) ) );
+        }
 
-    RandBoolRt( const RandBoolRt& ) = delete;
-    RandBoolRt& operator=( const RandBoolRt& ) = delete;
+        RandBoolRt( const RandBoolRt& ) = delete;
+        RandBoolRt& operator=( const RandBoolRt& ) = delete;
 
-    std::tuple<> inputs;
-    std::tuple<bool> outputs;
-};
+        std::tuple<> inputs;
+        std::tuple<bool> outputs;
+    };
 
-struct RandBool
-{
+public:
     using runtime = RandBoolRt;
 
     void Tick( runtime& rt ) const
@@ -70,19 +72,21 @@ struct RandBool
 /// And has 2 inputs and 1 output.
 /// This component performs a logic AND on 2 boolean input values and outputs the result.
 
-class AndRt final
+class And
 {
+private:
+    class AndRt final
+    {
+    public:
+        AndRt() = default;
+        AndRt( const AndRt& ) = delete;
+        AndRt& operator=( const AndRt& ) = delete;
+
+        std::tuple<bool, bool> inputs;
+        std::tuple<bool> outputs;
+    };
+
 public:
-    AndRt() = default;
-    AndRt( const AndRt& ) = delete;
-    AndRt& operator=( const AndRt& ) = delete;
-
-    std::tuple<bool, bool> inputs;
-    std::tuple<bool> outputs;
-};
-
-struct And
-{
     using runtime = AndRt;
 
     void Tick( runtime& rt ) const
@@ -95,20 +99,22 @@ struct And
 /// PrintBool has 1 input.
 /// This component receives a boolean value and outputs it to the console.
 
-class PrintRt final
+class PrintBool
 {
+private:
+    class PrintBoolRt final
+    {
+    public:
+        PrintBoolRt() = default;
+        PrintBoolRt( const PrintBoolRt& ) = delete;
+        PrintBoolRt& operator=( const PrintBoolRt& ) = delete;
+
+        std::tuple<bool> inputs;
+        std::tuple<> outputs;
+    };
+
 public:
-    PrintRt() = default;
-    PrintRt( const PrintRt& ) = delete;
-    PrintRt& operator=( const PrintRt& ) = delete;
-
-    std::tuple<bool> inputs;
-    std::tuple<> outputs;
-};
-
-struct PrintBool
-{
-    using runtime = PrintRt;
+    using runtime = PrintBoolRt;
 
     void Tick( runtime& rt ) const
     {
