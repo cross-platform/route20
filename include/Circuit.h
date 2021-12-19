@@ -70,7 +70,7 @@ private:
     template <auto comp>
     void InitMaps()
     {
-        using CompRt = decltype( comp )::runtime;
+        using CompRt = typename decltype( comp )::runtime;
         rts[comp.id].template emplace<CompRt>();
         tickeds[comp.id] = false;
     }
@@ -91,12 +91,12 @@ private:
         }
         tickeds[comp.id] = true;
 
-        using CompRt = decltype( comp )::runtime;
+        using CompRt = typename decltype( comp )::runtime;
 
         comp.InputWires( [this]<auto fromComp, auto output, auto input>() {
             Tick<fromComp>();
 
-            using FromCompRt = decltype( fromComp )::runtime;
+            using FromCompRt = typename decltype( fromComp )::runtime;
 
             std::get<input>( std::get<CompRt>( rts[comp.id] ).inputs ) =
                 std::get<output>( std::get<FromCompRt>( rts[fromComp.id] ).outputs );
